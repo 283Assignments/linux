@@ -53,7 +53,7 @@
 3. Open Virtual Machine Manager and create a new Virtual Machine using connection QEMU/KVM.
 4. Created a VM with Ubuntu 20.04.1-desktop ISO image file.
 5. Run the following command to know the exit count for the provided exit number
- - cpuid -l 0x4ffffffe -s <exit number>
+ - cpuid -l 0x4ffffffe -s exit number
 
 ## OUTPUT SCREENSHOT
 ![43F50DFA-4166-467A-8918-FC4FE2C10D70](https://user-images.githubusercontent.com/37695314/102023620-bb54d680-3d41-11eb-9744-672575b20dcf.jpeg)  
