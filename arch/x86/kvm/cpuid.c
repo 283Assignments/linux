@@ -1112,20 +1112,63 @@ bool kvm_cpuid(struct kvm_vcpu *vcpu, u32 *eax, u32 *ebx,
 }
 EXPORT_SYMBOL_GPL(kvm_cpuid);
 
+struct exit_data
+{
+	int exit_reason_number;
+	long number_of_exits;
+};
+
+struct exit_data exit_data_array[68];
 int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 {
-	u32 eax, ebx, ecx, edx;
+	u32 eax, ebx, ecx, edx, x;
 
 	if (cpuid_fault_enabled(vcpu) && !kvm_require_cpl(vcpu, 0))
 		return 1;
 
 	eax = kvm_rax_read(vcpu);
 	ecx = kvm_rcx_read(vcpu);
-	kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
-	kvm_rax_write(vcpu, eax);
-	kvm_rbx_write(vcpu, ebx);
-	kvm_rcx_write(vcpu, ecx);
-	kvm_rdx_write(vcpu, edx);
+	x = ecx;
+	if( eax == 0x4FFFFFFE){
+		
+		if( ecx == 35 || ecx == 38 || ecx == 42 || ecx == 65){
+			eax = 0;
+			ebx = 0;
+			ecx = 0;
+			edx = 0xffffffff;
+		}
+		else if(ecx == 3 || ecx == 4 ||ecx == 5 ||ecx == 6 ||ecx == 11 ||ecx == 16 ||ecx == 17 ||
+		ecx == 33 ||ecx == 34 ||ecx == 51 ||ecx == 63 ||ecx == 64 ||ecx == 66 ||ecx == 67 ||ecx == 68){
+			eax = 0;
+			ebx = 0;
+			ecx = 0;
+			edx = 0;
+		}
+		else{
+			
+			eax = exit_data_array[ecx].number_of_exits;
+			
+		}
+		printk("Exit Reason: %d , Exit Count: %d , edx:%d\n", x, eax, edx);
+		kvm_rax_write(vcpu, eax);	
+		kvm_rbx_write(vcpu, ebx);
+		kvm_rcx_write(vcpu, ecx);
+		kvm_rdx_write(vcpu, edx);
+		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
+
+	}
+	else
+        {	
+
+		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
+		kvm_rax_write(vcpu, eax);
+		kvm_rbx_write(vcpu, ebx);
+		kvm_rcx_write(vcpu, ecx);
+		kvm_rdx_write(vcpu, edx);
+	}
+	
+	
 	return kvm_skip_emulated_instruction(vcpu);
 }
+EXPORT_SYMBOL(exit_data_array);
 EXPORT_SYMBOL_GPL(kvm_emulate_cpuid);
