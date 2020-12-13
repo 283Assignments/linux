@@ -5928,6 +5928,12 @@ void dump_vmcs(void)
  * The guest has exited.  See if we can fix it or if we need userspace
  * assistance.
  */
+struct exit_data
+{
+	int exit_reason_number;
+	long number_of_exits;
+};
+extern struct exit_data exit_data_array[68];
 static int vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 {
 	struct vcpu_vmx *vmx = to_vmx(vcpu);
@@ -5941,6 +5947,7 @@ static int vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	 * mode as if vcpus is in root mode, the PML buffer must has been
 	 * flushed already.
 	 */
+	exit_data_array[exit_reason].number_of_exits += 1;
 	if (enable_pml)
 		vmx_flush_pml_buffer(vcpu);
 
